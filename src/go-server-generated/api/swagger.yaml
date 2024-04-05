@@ -1,0 +1,371 @@
+openapi: 3.0.0
+info:
+  title: Сервис баннеров
+  version: 1.0.0
+servers:
+- url: /
+paths:
+  /user_banner:
+    get:
+      summary: Получение баннера для пользователя
+      parameters:
+      - name: tag_id
+        in: query
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+          description: Тэг пользователя
+      - name: feature_id
+        in: query
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: integer
+          description: Идентификатор фичи
+      - name: use_last_revision
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          description: Получать актуальную информацию
+          default: false
+      - name: token
+        in: header
+        description: Токен пользователя
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: user_token
+      responses:
+        "200":
+          description: Баннер пользователя
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                description: JSON-отображение баннера
+                example: "{\"title\": \"some_title\", \"text\": \"some_text\", \"\
+                  url\": \"some_url\"}"
+                x-content-type: application/json
+        "400":
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+        "401":
+          description: Пользователь не авторизован
+        "403":
+          description: Пользователь не имеет доступа
+        "404":
+          description: Баннер для не найден
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+  /banner:
+    get:
+      summary: Получение всех баннеров c фильтрацией по фиче и/или тегу
+      parameters:
+      - name: token
+        in: header
+        description: Токен админа
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: admin_token
+      - name: feature_id
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          description: Идентификатор фичи
+      - name: tag_id
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          description: Идентификатор тега
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          description: Лимит
+      - name: offset
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          description: Оффсет
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/inline_response_200'
+                x-content-type: application/json
+        "401":
+          description: Пользователь не авторизован
+        "403":
+          description: Пользователь не имеет доступа
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+    post:
+      summary: Создание нового баннера
+      parameters:
+      - name: token
+        in: header
+        description: Токен админа
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: admin_token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/banner_body'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_201'
+        "400":
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+        "401":
+          description: Пользователь не авторизован
+        "403":
+          description: Пользователь не имеет доступа
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+  /banner/{id}:
+    delete:
+      summary: Удаление баннера по идентификатору
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          description: Идентификатор баннера
+      - name: token
+        in: header
+        description: Токен админа
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: admin_token
+      responses:
+        "204":
+          description: Баннер успешно удален
+        "400":
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+        "401":
+          description: Пользователь не авторизован
+        "403":
+          description: Пользователь не имеет доступа
+        "404":
+          description: Баннер для тэга не найден
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+    patch:
+      summary: Обновление содержимого баннера
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          description: Идентификатор баннера
+      - name: token
+        in: header
+        description: Токен админа
+        required: false
+        style: simple
+        explode: false
+        schema:
+          type: string
+          example: admin_token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/banner_id_body'
+        required: true
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Некорректные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+        "401":
+          description: Пользователь не авторизован
+        "403":
+          description: Пользователь не имеет доступа
+        "404":
+          description: Баннер не найден
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+components:
+  schemas:
+    inline_response_400:
+      type: object
+      properties:
+        error:
+          type: string
+    inline_response_200:
+      type: object
+      properties:
+        banner_id:
+          type: integer
+          description: Идентификатор баннера
+        tag_ids:
+          type: array
+          description: Идентификаторы тэгов
+          items:
+            type: integer
+        feature_id:
+          type: integer
+          description: Идентификатор фичи
+        content:
+          type: object
+          additionalProperties: true
+          description: Содержимое баннера
+          example: "{\"title\": \"some_title\", \"text\": \"some_text\", \"url\":\
+            \ \"some_url\"}"
+        is_active:
+          type: boolean
+          description: Флаг активности баннера
+        created_at:
+          type: string
+          description: Дата создания баннера
+          format: date-time
+        updated_at:
+          type: string
+          description: Дата обновления баннера
+          format: date-time
+      example:
+        feature_id: 1
+        tag_ids:
+        - 6
+        - 6
+        is_active: true
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        banner_id: 0
+        created_at: 2000-01-23T04:56:07.000+00:00
+        content: "{\"title\": \"some_title\", \"text\": \"some_text\", \"url\": \"\
+          some_url\"}"
+    banner_body:
+      type: object
+      properties:
+        tag_ids:
+          type: array
+          description: Идентификаторы тэгов
+          items:
+            type: integer
+        feature_id:
+          type: integer
+          description: Идентификатор фичи
+        content:
+          type: object
+          additionalProperties: true
+          description: Содержимое баннера
+          example: "{\"title\": \"some_title\", \"text\": \"some_text\", \"url\":\
+            \ \"some_url\"}"
+        is_active:
+          type: boolean
+          description: Флаг активности баннера
+    inline_response_201:
+      type: object
+      properties:
+        banner_id:
+          type: integer
+          description: Идентификатор созданного баннера
+      example:
+        banner_id: 0
+    banner_id_body:
+      type: object
+      properties:
+        tag_ids:
+          type: array
+          description: Идентификаторы тэгов
+          nullable: true
+          items:
+            type: integer
+        feature_id:
+          type: integer
+          description: Идентификатор фичи
+          nullable: true
+        content:
+          type: object
+          additionalProperties: true
+          description: Содержимое баннера
+          nullable: true
+          example: "{\"title\": \"some_title\", \"text\": \"some_text\", \"url\":\
+            \ \"some_url\"}"
+        is_active:
+          type: boolean
+          description: Флаг активности баннера
+          nullable: true
