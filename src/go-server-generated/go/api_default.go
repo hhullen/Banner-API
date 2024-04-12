@@ -13,7 +13,7 @@ import (
 	"net/http"
 )
 
-type ModelMap model.Content
+type ModelMap model.ContentDTO
 
 func BannerGet(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
