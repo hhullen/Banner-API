@@ -24,13 +24,14 @@ func (me *Application) CheckRoleByToken(token string) string {
 	return role
 }
 
-func (me *Application) AddBanner(banner gen_api.BannerBody) (uint, error) {
+func (me *Application) AddBanner(banner gen_api.BannerBody) (int32, error) {
 	content := model.BannerContent{
 		Title:     banner.Content.Title,
 		Text:      banner.Content.Text,
 		Url:       banner.Content.Url,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
+		IsActive:  banner.IsActive,
 	}
 	id, err := me.storage.AddBannerContent(content)
 	if err != nil {
@@ -38,14 +39,14 @@ func (me *Application) AddBanner(banner gen_api.BannerBody) (uint, error) {
 	}
 
 	feature := model.Feature{
-		ID:        uint(banner.FeatureId),
+		ID:        banner.FeatureId,
 		ContentID: id,
 	}
 	me.storage.AddBannerFeature(feature)
 
 	for _, tagID := range banner.TagIds {
 		err = me.storage.AddBannerTag(model.Tag{
-			ID:        uint(tagID),
+			ID:        tagID,
 			ContentID: id,
 		})
 		if err != nil {
@@ -54,4 +55,52 @@ func (me *Application) AddBanner(banner gen_api.BannerBody) (uint, error) {
 	}
 
 	return id, nil
+}
+
+func (me *Application) IsBannerExists(id int32) bool {
+	return me.storage.IsBannerExists(id)
+}
+
+func (me *Application) UpdatedBanner(id int32, banner gen_api.BannerBody) error {
+	content, err := me.storage.GetBannerContent(id)
+	if err != nil {
+		return err
+	}
+	content.UpdatedAt = time.Now()
+	content.Title = banner.Content.Title
+	content.Text = banner.Content.Text
+	content.Url = banner.Content.Url
+	content.IsActive = banner.IsActive
+	err = me.storage.UpdateBannerContent(content)
+	if err != nil {
+		return err
+	}
+
+	err = me.storage.DeleteBannerFeature(id)
+	if err != nil {
+		return err
+	}
+
+	err = me.storage.DeleteBannerTags(id)
+	if err != nil {
+		return err
+	}
+
+	feature := model.Feature{
+		ID:        banner.FeatureId,
+		ContentID: id,
+	}
+	me.storage.AddBannerFeature(feature)
+
+	for _, tagID := range banner.TagIds {
+		err = me.storage.AddBannerTag(model.Tag{
+			ID:        tagID,
+			ContentID: id,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

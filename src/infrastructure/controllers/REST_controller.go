@@ -12,8 +12,8 @@ import (
 
 const (
 	RoleHeaderKey     = "Role"
-	InvalidBodyErr    = "Invalid body"
-	InternalServerErr = "Internal error occured"
+	InvalidDataErr    = "{\"error\": \"Invalid data\"}"
+	InternalServerErr = "{\"error\": \"Internal error occured\"}"
 )
 
 type ControllerREST struct {

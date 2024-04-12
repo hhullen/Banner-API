@@ -6,7 +6,14 @@ import (
 
 type IRepository interface {
 	GetUserRoleByToken(string) (string, error)
-	AddBannerContent(model.BannerContent) (uint, error)
+	AddBannerContent(model.BannerContent) (int32, error)
 	AddBannerFeature(model.Feature) error
 	AddBannerTag(model.Tag) error
+	UpdateBannerContent(model.BannerContent) error
+	UpdateBannerFeature(model.Feature) error
+	UpdateBannerTag(model.Tag) error
+	GetBannerContent(int32) (model.BannerContent, error)
+	DeleteBannerFeature(int32) error
+	DeleteBannerTags(int32) error
+	IsBannerExists(int32) bool
 }

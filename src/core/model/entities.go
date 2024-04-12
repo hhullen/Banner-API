@@ -11,7 +11,7 @@ type ContentDTO struct {
 }
 
 type BannerContent struct {
-	ID        uint `gorm:"primary_key"`
+	ID        int32 `gorm:"primary_key"`
 	Title     string
 	Text      string
 	Url       string
@@ -21,11 +21,11 @@ type BannerContent struct {
 }
 
 type Feature struct {
-	ID        uint `gorm:"primary_key"`
-	ContentID uint `gorm:"not null"`
+	ID        int32 `gorm:"primary_key"`
+	ContentID int32 `gorm:"not null"`
 }
 
 type Tag struct {
-	ID        uint `gorm:"primary_key"`
-	ContentID uint `gorm:"not null"`
+	ID        int32 `gorm:"primary_key"`
+	ContentID int32 `gorm:"not null"`
 }

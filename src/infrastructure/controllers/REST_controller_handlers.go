@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"path"
 	"time"
 
 	"main/core/model"
@@ -15,9 +16,6 @@ func (me *ControllerREST) handleMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		token := r.Header.Get("user_token")
-		if token == "" {
-			token = r.URL.Query().Get("user_token")
-		}
 
 		role := me.app.CheckRoleByToken(token)
 		if role == "" {
@@ -58,7 +56,34 @@ func (me *ControllerREST) handleBannerIdPatch(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	w.WriteHeader(http.StatusNotImplemented)
+	var banner_id int32
+	_, err := fmt.Sscanf(path.Base(r.RequestURI), "%d", &banner_id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(InvalidDataErr))
+		return
+	}
+
+	var banner_new gen_api.BannerBody
+	err = json.NewDecoder(r.Body).Decode(&banner_new)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(InvalidDataErr))
+		return
+	}
+
+	if !me.app.IsBannerExists(banner_id) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(InvalidDataErr))
+		return
+	}
+
+	err = me.app.UpdatedBanner(banner_id, banner_new)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(InternalServerErr))
+		return
+	}
 }
 
 func (me *ControllerREST) handleBannerPost(w http.ResponseWriter, r *http.Request) {
@@ -71,20 +96,17 @@ func (me *ControllerREST) handleBannerPost(w http.ResponseWriter, r *http.Reques
 	err := json.NewDecoder(r.Body).Decode(&banner)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		res, _ := json.Marshal(gen_api.InlineResponse400{Error_: InvalidBodyErr})
-		w.Write(res)
+		w.Write([]byte(InvalidDataErr))
 		return
 	}
 
 	id, err := me.app.AddBanner(banner)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		res, _ := json.Marshal(gen_api.InlineResponse400{Error_: InternalServerErr})
-		w.Write(res)
+		w.Write([]byte(InternalServerErr))
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	res, _ := json.Marshal(gen_api.InlineResponse201{BannerId: int32(id)})
 	w.Write(res)
 }
@@ -95,5 +117,9 @@ func (me *ControllerREST) handleUserBannerGet(w http.ResponseWriter, r *http.Req
 
 func (me *ControllerREST) handleIndex(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
-	fmt.Fprintf(w, "{\"what\": \"Dattebayo!!!\"}")
+	fmt.Fprintf(w, "{\"Nani\": \"Dattebayo!!!\"}")
+}
+
+func isBannerAllowedToRole(banner *gen_api.BannerIdBody, role string) bool {
+	return !banner.IsActive && role == model.UserRole
 }
