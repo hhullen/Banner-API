@@ -52,6 +52,10 @@ func (me *MOCKDB) GetBannerContent(id int32) (model.BannerContent, error) {
 	}, nil
 }
 
+func (me *MOCKDB) DeleteBannerContent(int32) error {
+	return nil
+}
+
 func (me *MOCKDB) DeleteBannerFeature(int32) error {
 	return nil
 }

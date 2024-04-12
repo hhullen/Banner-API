@@ -57,10 +57,6 @@ func (me *Application) AddBanner(banner gen_api.BannerBody) (int32, error) {
 	return id, nil
 }
 
-func (me *Application) IsBannerExists(id int32) bool {
-	return me.storage.IsBannerExists(id)
-}
-
 func (me *Application) UpdatedBanner(id int32, banner gen_api.BannerBody) error {
 	content, err := me.storage.GetBannerContent(id)
 	if err != nil {
@@ -103,4 +99,12 @@ func (me *Application) UpdatedBanner(id int32, banner gen_api.BannerBody) error 
 	}
 
 	return nil
+}
+
+func (me *Application) DeleteBanner(id int32) error {
+	return me.storage.DeleteBannerContent(id)
+}
+
+func (me *Application) IsBannerExists(id int32) bool {
+	return me.storage.IsBannerExists(id)
 }

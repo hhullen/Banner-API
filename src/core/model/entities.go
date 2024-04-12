@@ -2,8 +2,6 @@ package model
 
 import "time"
 
-// '{"title": "some_title", "text": "some_text", "url": "some_url"}'
-
 type ContentDTO struct {
 	Title string `json:"title"`
 	Text  string `json:"text"`

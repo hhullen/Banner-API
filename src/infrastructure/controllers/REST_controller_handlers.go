@@ -42,16 +42,7 @@ func (me *ControllerREST) handleBannerGet(w http.ResponseWriter, r *http.Request
 }
 
 func (me *ControllerREST) handleBannerIdDelete(w http.ResponseWriter, r *http.Request) {
-	if r.Header.Get(RoleHeaderKey) != model.AdminRole {
-		w.WriteHeader(http.StatusForbidden)
-		return
-	}
-
-	w.WriteHeader(http.StatusNotImplemented)
-}
-
-func (me *ControllerREST) handleBannerIdPatch(w http.ResponseWriter, r *http.Request) {
-	if r.Header.Get(RoleHeaderKey) != model.AdminRole {
+	if !isAdminRole(r.Header.Get(RoleHeaderKey)) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -60,7 +51,35 @@ func (me *ControllerREST) handleBannerIdPatch(w http.ResponseWriter, r *http.Req
 	_, err := fmt.Sscanf(path.Base(r.RequestURI), "%d", &banner_id)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(InvalidDataErr))
+		w.Write([]byte(InvalidURIDataErr))
+		return
+	}
+
+	if !me.app.IsBannerExists(banner_id) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(NotExistsResourceErr))
+		return
+	}
+
+	err = me.app.DeleteBanner(banner_id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(InternalServerErr))
+		return
+	}
+}
+
+func (me *ControllerREST) handleBannerIdPatch(w http.ResponseWriter, r *http.Request) {
+	if !isAdminRole(r.Header.Get(RoleHeaderKey)) {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	var banner_id int32
+	_, err := fmt.Sscanf(path.Base(r.RequestURI), "%d", &banner_id)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(InvalidURIDataErr))
 		return
 	}
 
@@ -68,13 +87,13 @@ func (me *ControllerREST) handleBannerIdPatch(w http.ResponseWriter, r *http.Req
 	err = json.NewDecoder(r.Body).Decode(&banner_new)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(InvalidDataErr))
+		w.Write([]byte(InvalidBodyDataErr))
 		return
 	}
 
 	if !me.app.IsBannerExists(banner_id) {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(InvalidDataErr))
+		w.Write([]byte(NotExistsResourceErr))
 		return
 	}
 
@@ -87,7 +106,7 @@ func (me *ControllerREST) handleBannerIdPatch(w http.ResponseWriter, r *http.Req
 }
 
 func (me *ControllerREST) handleBannerPost(w http.ResponseWriter, r *http.Request) {
-	if r.Header.Get(RoleHeaderKey) != model.AdminRole {
+	if !isAdminRole(r.Header.Get(RoleHeaderKey)) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -96,7 +115,7 @@ func (me *ControllerREST) handleBannerPost(w http.ResponseWriter, r *http.Reques
 	err := json.NewDecoder(r.Body).Decode(&banner)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(InvalidDataErr))
+		w.Write([]byte(InvalidBodyDataErr))
 		return
 	}
 
@@ -122,4 +141,8 @@ func (me *ControllerREST) handleIndex(w http.ResponseWriter, r *http.Request) {
 
 func isBannerAllowedToRole(banner *gen_api.BannerIdBody, role string) bool {
 	return !banner.IsActive && role == model.UserRole
+}
+
+func isAdminRole(role string) bool {
+	return role == model.AdminRole
 }

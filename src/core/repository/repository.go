@@ -13,6 +13,7 @@ type IRepository interface {
 	UpdateBannerFeature(model.Feature) error
 	UpdateBannerTag(model.Tag) error
 	GetBannerContent(int32) (model.BannerContent, error)
+	DeleteBannerContent(int32) error
 	DeleteBannerFeature(int32) error
 	DeleteBannerTags(int32) error
 	IsBannerExists(int32) bool
