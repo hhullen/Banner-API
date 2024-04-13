@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"main/core/application"
-	"main/infrastructure/storage"
+	"main/core/repository"
 )
 
 const (
@@ -24,13 +24,11 @@ type ControllerREST struct {
 	app    *application.Application
 }
 
-func NewControllerREST() *ControllerREST {
+func NewControllerREST(storage repository.IRepository) *ControllerREST {
 	router := sw.NewRouter()
-
-	database := &storage.MOCKDB{}
 	ctrl := &ControllerREST{
 		router: router,
-		app:    application.NewApplication(database),
+		app:    application.NewApplication(storage),
 	}
 
 	router.GetRoute("UserBannerGet").HandlerFunc(ctrl.handleUserBannerGet)

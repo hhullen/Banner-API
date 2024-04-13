@@ -28,7 +28,7 @@ func (me *ControllerREST) handleMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 
 		log.Printf(
-			"%s %s %s %s",
+			"[API] %s %s %s %s",
 			r.Method,
 			r.RequestURI,
 			r.Host,
