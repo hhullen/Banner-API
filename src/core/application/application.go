@@ -108,3 +108,39 @@ func (me *Application) DeleteBanner(id int32) error {
 func (me *Application) IsBannerExists(id int32) bool {
 	return me.storage.IsBannerExists(id)
 }
+
+func (me *Application) GetAllBannersByFilters(feature, tag, limit, offset int32, deactivated bool) ([]gen_api.InlineResponse200, error) {
+	contents, err := me.storage.GetAllBannersByFilters(feature, tag, limit, offset, deactivated)
+	if err != nil {
+		return nil, err
+	}
+	var returnable []gen_api.InlineResponse200
+	for _, content := range contents {
+		feature, err := me.storage.GetBannerFeatere(content.ID)
+		if err != nil {
+			return nil, err
+		}
+		tags, err := me.storage.GetBannerTags(content.ID)
+		if err != nil {
+			return nil, err
+		}
+		var tagsIds []int32
+		for i := range tags {
+			tagsIds = append(tagsIds, tags[i].ID)
+		}
+		returnable = append(returnable, gen_api.InlineResponse200{
+			BannerId:  content.ID,
+			TagIds:    tagsIds,
+			FeatureId: feature.ID,
+			Content: gen_api.ModelMap{
+				Title: content.Title,
+				Text:  content.Text,
+				Url:   content.Url,
+			},
+			IsActive:  content.IsActive,
+			CreatedAt: content.CreatedAt,
+			UpdatedAt: content.UpdatedAt,
+		})
+	}
+	return returnable, nil
+}

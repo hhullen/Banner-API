@@ -38,7 +38,52 @@ func (me *ControllerREST) handleMiddleware(next http.Handler) http.Handler {
 }
 
 func (me *ControllerREST) handleBannerGet(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
+	featureId, err := readQueryInteger(r, "feature_id")
+	if err != nil {
+		featureId = -1
+	}
+
+	tagId, err := readQueryInteger(r, "tag_id")
+	if err != nil {
+		tagId = -1
+	}
+
+	if featureId == -1 && tagId == -1 {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(AbsenceOfQueryParam))
+		return
+	}
+
+	limit, err := readQueryInteger(r, "limit")
+	if err != nil {
+		limit = -1
+	}
+
+	offset, err := readQueryInteger(r, "offset")
+	if err != nil {
+		offset = 0
+	}
+
+	includeDeactivated := isAdminRole(r.Header.Get(RoleHeaderKey))
+	banners, err := me.app.GetAllBannersByFilters(featureId, tagId, limit, offset, includeDeactivated)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(InternalServerErr))
+		return
+	}
+
+	jsonResp, err := json.Marshal(banners)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(InternalServerErr))
+		return
+	}
+	w.Write(jsonResp)
+}
+
+func readQueryInteger(r *http.Request, name string) (num int32, err error) {
+	_, err = fmt.Sscanf(r.URL.Query().Get(name), "%d", &num)
+	return
 }
 
 func (me *ControllerREST) handleBannerIdDelete(w http.ResponseWriter, r *http.Request) {
@@ -47,21 +92,21 @@ func (me *ControllerREST) handleBannerIdDelete(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	var banner_id int32
-	_, err := fmt.Sscanf(path.Base(r.RequestURI), "%d", &banner_id)
+	var bannerId int32
+	_, err := fmt.Sscanf(path.Base(r.RequestURI), "%d", &bannerId)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(InvalidURIDataErr))
 		return
 	}
 
-	if !me.app.IsBannerExists(banner_id) {
+	if !me.app.IsBannerExists(bannerId) {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(NotExistsResourceErr))
 		return
 	}
 
-	err = me.app.DeleteBanner(banner_id)
+	err = me.app.DeleteBanner(bannerId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(InternalServerErr))
@@ -75,29 +120,29 @@ func (me *ControllerREST) handleBannerIdPatch(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	var banner_id int32
-	_, err := fmt.Sscanf(path.Base(r.RequestURI), "%d", &banner_id)
+	var bannerId int32
+	_, err := fmt.Sscanf(path.Base(r.RequestURI), "%d", &bannerId)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(InvalidURIDataErr))
 		return
 	}
 
-	var banner_new gen_api.BannerBody
-	err = json.NewDecoder(r.Body).Decode(&banner_new)
+	var bannerNew gen_api.BannerBody
+	err = json.NewDecoder(r.Body).Decode(&bannerNew)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(InvalidBodyDataErr))
 		return
 	}
 
-	if !me.app.IsBannerExists(banner_id) {
+	if !me.app.IsBannerExists(bannerId) {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(NotExistsResourceErr))
 		return
 	}
 
-	err = me.app.UpdatedBanner(banner_id, banner_new)
+	err = me.app.UpdatedBanner(bannerId, bannerNew)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(InternalServerErr))
@@ -137,10 +182,6 @@ func (me *ControllerREST) handleUserBannerGet(w http.ResponseWriter, r *http.Req
 func (me *ControllerREST) handleIndex(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotImplemented)
 	fmt.Fprintf(w, "{\"Nani\": \"Dattebayo!!!\"}")
-}
-
-func isBannerAllowedToRole(banner *gen_api.BannerIdBody, role string) bool {
-	return !banner.IsActive && role == model.UserRole
 }
 
 func isAdminRole(role string) bool {

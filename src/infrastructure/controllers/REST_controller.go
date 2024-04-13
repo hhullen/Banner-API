@@ -16,6 +16,7 @@ const (
 	InvalidURIDataErr    = "{\"error\": \"Invalid URI data\"}"
 	NotExistsResourceErr = "{\"error\": \"Recousre does not exists\"}"
 	InternalServerErr    = "{\"error\": \"Internal error occured\"}"
+	AbsenceOfQueryParam  = "{\"error\": \"Absence of required query param\"}"
 )
 
 type ControllerREST struct {
