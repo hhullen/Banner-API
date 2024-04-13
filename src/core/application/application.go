@@ -144,3 +144,18 @@ func (me *Application) GetAllBannersByFilters(feature, tag, limit, offset int32,
 	}
 	return returnable, nil
 }
+
+func (me *Application) GetSpecificBanner(feature, tag int32, deactivated bool) (*gen_api.ModelMap, error) {
+	content, err := me.storage.GetSpecificBanner(feature, tag, deactivated)
+	if err != nil {
+		return nil, err
+	}
+	if content == nil {
+		return nil, nil
+	}
+	return &gen_api.ModelMap{
+		Title: content.Title,
+		Text:  content.Text,
+		Url:   content.Url,
+	}, nil
+}

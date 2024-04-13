@@ -71,6 +71,10 @@ func (me *ControllerREST) handleBannerGet(w http.ResponseWriter, r *http.Request
 		w.Write([]byte(InternalServerErr))
 		return
 	}
+	if len(banners) == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 
 	jsonResp, err := json.Marshal(banners)
 	if err != nil {
@@ -176,7 +180,38 @@ func (me *ControllerREST) handleBannerPost(w http.ResponseWriter, r *http.Reques
 }
 
 func (me *ControllerREST) handleUserBannerGet(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotImplemented)
+	featureId, err := readQueryInteger(r, "feature_id")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(AbsenceOfQueryParam))
+		return
+	}
+
+	tagId, err := readQueryInteger(r, "tag_id")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(AbsenceOfQueryParam))
+		return
+	}
+	includeDeactivated := isAdminRole(r.Header.Get(RoleHeaderKey))
+	banner, err := me.app.GetSpecificBanner(featureId, tagId, includeDeactivated)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(InternalServerErr))
+		return
+	}
+	if banner == nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	jsonResp, err := json.Marshal(banner)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(InternalServerErr))
+		return
+	}
+	w.Write(jsonResp)
 }
 
 func (me *ControllerREST) handleIndex(w http.ResponseWriter, r *http.Request) {

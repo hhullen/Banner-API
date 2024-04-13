@@ -95,3 +95,10 @@ func (me *MOCKDB) GetAllBannersByFilters(feature, tag, limit, offset int32, deac
 	}
 	return []model.BannerContent{}, nil
 }
+
+func (me *MOCKDB) GetSpecificBanner(feature, tag int32, deactivated bool) (*model.BannerContent, error) {
+	if deactivated {
+		return &bannerContent, nil
+	}
+	return nil, nil
+}

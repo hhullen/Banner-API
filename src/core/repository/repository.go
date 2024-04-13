@@ -20,4 +20,5 @@ type IRepository interface {
 	DeleteBannerTags(int32) error
 	IsBannerExists(int32) bool
 	GetAllBannersByFilters(int32, int32, int32, int32, bool) ([]model.BannerContent, error)
+	GetSpecificBanner(int32, int32, bool) (*model.BannerContent, error)
 }
