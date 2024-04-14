@@ -1,7 +1,6 @@
 all: test run
 
 test:
-	ENV=`cat .env`
 	go clean -testcache
 	go test ./infrastructure/controllers -v
 
