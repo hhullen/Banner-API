@@ -1,7 +1,7 @@
 all: test run
 
 test:
-	go test .
+	go test ./infrastructure/controllers
 
 run: prepare_env
 	docker-compose build

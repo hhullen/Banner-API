@@ -5,6 +5,7 @@ import (
 )
 
 type IRepository interface {
+	AddDefaultUser(model.User) error
 	GetUserRoleByToken(string) (string, error)
 	AddBannerContent(model.BannerContent) (int32, error)
 	AddBannerFeature(model.Feature) error

@@ -32,6 +32,8 @@ services:
       - DB_PORT=5432
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - DB_USER=${POSTGRES_USER_NAME}
+      - DEFAULT_ADMIN_TOKEN=${DEFAULT_ADMIN_TOKEN}
+      - DEFAULT_USER_TOKEN=${DEFAULT_USER_TOKEN}
     depends_on: 
       db:
         condition: service_healthy

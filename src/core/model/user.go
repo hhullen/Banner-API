@@ -6,6 +6,7 @@ const (
 )
 
 type User struct {
-	Role  string `gorm:"not null"`
-	Token string `gorm:"not null"`
+	ID    int32  `gorm:"primary_key"`
+	Role  string `gorm:"not null;check:role <> ''"`
+	Token string `gorm:"not null;check:token <> ''"`
 }

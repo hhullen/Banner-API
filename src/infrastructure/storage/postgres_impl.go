@@ -60,6 +60,32 @@ func (me *PostgreSQL) Migrate() error {
 	return nil
 }
 
+func (me *PostgreSQL) AddDefaultUser(user model.User) error {
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	var user_old model.User
+	err := tx.Where("role = ?", user.Role).Where("token = ?", user.Token).Find(&user_old).Error
+	if err != nil {
+		return err
+	}
+	if user_old.Role != user.Role || user_old.Token != user.Token {
+		err = tx.Create(&user).Error
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func (me *PostgreSQL) GetUserRoleByToken(token string) (string, error) {
 	tx := me.db.Begin()
 	defer func() {

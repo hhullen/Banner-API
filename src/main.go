@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"main/core/model"
 	"main/infrastructure/controllers"
 	"main/infrastructure/storage"
 )
@@ -21,6 +22,14 @@ func main() {
 	)
 
 	database := storage.NewPostgreSQL(dsn)
+	database.AddDefaultUser(model.User{
+		Role:  model.AdminRole,
+		Token: os.Getenv("DEFAULT_ADMIN_TOKEN"),
+	})
+	database.AddDefaultUser(model.User{
+		Role:  model.UserRole,
+		Token: os.Getenv("DEFAULT_USER_TOKEN"),
+	})
 
 	ctrl := controllers.NewControllerREST(database)
 	log.Fatal(ctrl.Serve(":8080"))
