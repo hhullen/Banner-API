@@ -1,7 +1,9 @@
 all: test run
 
 test:
-	go test ./infrastructure/controllers
+	ENV=`cat .env`
+	go clean -testcache
+	go test ./infrastructure/controllers -v
 
 run: prepare_env
 	docker-compose build
