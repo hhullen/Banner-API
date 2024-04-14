@@ -194,6 +194,17 @@ func (me *ControllerREST) handleUserBannerGet(w http.ResponseWriter, r *http.Req
 		return
 	}
 	includeDeactivated := isAdminRole(r.Header.Get(RoleHeaderKey))
+
+	cacheKey := fmt.Sprintf("%d:%d:%t", featureId, tagId, includeDeactivated)
+	if r.URL.Query().Get("use_last_revision") != "true" {
+		cachedBanner, err := me.cache.Get(me.cache.Context(), cacheKey).Result()
+		if err == nil {
+			log.Printf("[CONTROLLER REST] Got cached banner for %d:%d", featureId, tagId)
+			w.Write([]byte(cachedBanner))
+			return
+		}
+	}
+
 	banner, err := me.app.GetSpecificBanner(featureId, tagId, includeDeactivated)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -212,6 +223,7 @@ func (me *ControllerREST) handleUserBannerGet(w http.ResponseWriter, r *http.Req
 		return
 	}
 	w.Write(jsonResp)
+	me.cache.Set(me.cache.Context(), cacheKey, jsonResp, CacheExpiringMinutes)
 }
 
 func (me *ControllerREST) handleIndex(w http.ResponseWriter, r *http.Request) {
