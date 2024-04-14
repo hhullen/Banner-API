@@ -14,7 +14,7 @@ const (
 	RoleHeaderKey        = "Role"
 	InvalidBodyDataErr   = "{\"error\": \"Invalid body data\"}"
 	InvalidURIDataErr    = "{\"error\": \"Invalid URI data\"}"
-	NotExistsResourceErr = "{\"error\": \"Recousre does not exists\"}"
+	NotExistsResourceErr = "{\"error\": \"Resource does not exists\"}"
 	InternalServerErr    = "{\"error\": \"Internal error occured\"}"
 	AbsenceOfQueryParam  = "{\"error\": \"Absence of required query param\"}"
 )

@@ -19,11 +19,11 @@ type BannerContent struct {
 }
 
 type Feature struct {
-	ID        int32 `gorm:"primary_key"`
+	FeatureID int32 `gorm:"not null"`
 	ContentID int32 `gorm:"not null"`
 }
 
 type Tag struct {
-	ID        int32 `gorm:"primary_key"`
+	TagId     int32 `gorm:"not null"`
 	ContentID int32 `gorm:"not null"`
 }

@@ -39,14 +39,14 @@ func (me *Application) AddBanner(banner gen_api.BannerBody) (int32, error) {
 	}
 
 	feature := model.Feature{
-		ID:        banner.FeatureId,
+		FeatureID: banner.FeatureId,
 		ContentID: id,
 	}
 	me.storage.AddBannerFeature(feature)
 
 	for _, tagID := range banner.TagIds {
 		err = me.storage.AddBannerTag(model.Tag{
-			ID:        tagID,
+			TagId:     tagID,
 			ContentID: id,
 		})
 		if err != nil {
@@ -83,14 +83,14 @@ func (me *Application) UpdatedBanner(id int32, banner gen_api.BannerBody) error 
 	}
 
 	feature := model.Feature{
-		ID:        banner.FeatureId,
+		FeatureID: banner.FeatureId,
 		ContentID: id,
 	}
 	me.storage.AddBannerFeature(feature)
 
 	for _, tagID := range banner.TagIds {
 		err = me.storage.AddBannerTag(model.Tag{
-			ID:        tagID,
+			TagId:     tagID,
 			ContentID: id,
 		})
 		if err != nil {
@@ -102,6 +102,15 @@ func (me *Application) UpdatedBanner(id int32, banner gen_api.BannerBody) error 
 }
 
 func (me *Application) DeleteBanner(id int32) error {
+	err := me.storage.DeleteBannerFeature(id)
+	if err != nil {
+		return err
+	}
+
+	err = me.storage.DeleteBannerTags(id)
+	if err != nil {
+		return err
+	}
 	return me.storage.DeleteBannerContent(id)
 }
 
@@ -109,8 +118,8 @@ func (me *Application) IsBannerExists(id int32) bool {
 	return me.storage.IsBannerExists(id)
 }
 
-func (me *Application) GetAllBannersByFilters(feature, tag, limit, offset int32, deactivated bool) ([]gen_api.InlineResponse200, error) {
-	contents, err := me.storage.GetAllBannersByFilters(feature, tag, limit, offset, deactivated)
+func (me *Application) GetAllBannersByFilters(feature, tag, limit, offset int32, includeDeactivated bool) ([]gen_api.InlineResponse200, error) {
+	contents, err := me.storage.GetAllBannersByFilters(feature, tag, limit, offset, includeDeactivated)
 	if err != nil {
 		return nil, err
 	}
@@ -126,12 +135,12 @@ func (me *Application) GetAllBannersByFilters(feature, tag, limit, offset int32,
 		}
 		var tagsIds []int32
 		for i := range tags {
-			tagsIds = append(tagsIds, tags[i].ID)
+			tagsIds = append(tagsIds, tags[i].TagId)
 		}
 		returnable = append(returnable, gen_api.InlineResponse200{
 			BannerId:  content.ID,
 			TagIds:    tagsIds,
-			FeatureId: feature.ID,
+			FeatureId: feature.FeatureID,
 			Content: gen_api.ModelMap{
 				Title: content.Title,
 				Text:  content.Text,
@@ -145,8 +154,8 @@ func (me *Application) GetAllBannersByFilters(feature, tag, limit, offset int32,
 	return returnable, nil
 }
 
-func (me *Application) GetSpecificBanner(feature, tag int32, deactivated bool) (*gen_api.ModelMap, error) {
-	content, err := me.storage.GetSpecificBanner(feature, tag, deactivated)
+func (me *Application) GetSpecificBanner(feature, tag int32, includeDeactivated bool) (*gen_api.ModelMap, error) {
+	content, err := me.storage.GetSpecificBanner(feature, tag, includeDeactivated)
 	if err != nil {
 		return nil, err
 	}

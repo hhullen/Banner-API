@@ -60,18 +60,14 @@ func (me *PostgreSQL) Migrate() error {
 	return nil
 }
 
-func (me *PostgreSQL) beginTransactionSafely() *gorm.DB {
+func (me *PostgreSQL) GetUserRoleByToken(token string) (string, error) {
 	tx := me.db.Begin()
 	defer func() {
 		if r := recover(); r != nil {
 			tx.Rollback()
 		}
 	}()
-	return tx
-}
 
-func (me *PostgreSQL) GetUserRoleByToken(token string) (string, error) {
-	tx := me.beginTransactionSafely()
 	var user model.User
 	err := tx.First(&user, "token = ?", token).Error
 	if err != nil {
@@ -85,7 +81,12 @@ func (me *PostgreSQL) GetUserRoleByToken(token string) (string, error) {
 }
 
 func (me *PostgreSQL) AddBannerContent(banner model.BannerContent) (int32, error) {
-	tx := me.beginTransactionSafely()
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
 	err := tx.Create(&banner).Error
 	if err != nil {
@@ -99,7 +100,12 @@ func (me *PostgreSQL) AddBannerContent(banner model.BannerContent) (int32, error
 }
 
 func (me *PostgreSQL) AddBannerFeature(feature model.Feature) error {
-	tx := me.beginTransactionSafely()
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
 	err := tx.Create(&feature).Error
 	if err != nil {
@@ -113,7 +119,12 @@ func (me *PostgreSQL) AddBannerFeature(feature model.Feature) error {
 }
 
 func (me *PostgreSQL) AddBannerTag(tag model.Tag) error {
-	tx := me.beginTransactionSafely()
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
 	err := tx.Create(&tag).Error
 	if err != nil {
@@ -127,10 +138,15 @@ func (me *PostgreSQL) AddBannerTag(tag model.Tag) error {
 }
 
 func (me *PostgreSQL) IsBannerExists(id int32) bool {
-	tx := me.beginTransactionSafely()
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
 	var banner model.BannerContent
-	err := tx.Find(&banner, "ID = ?", id).Error
+	err := tx.First(&banner, "id = ?", id).Error
 	if err != nil {
 		return false
 	}
@@ -142,7 +158,12 @@ func (me *PostgreSQL) IsBannerExists(id int32) bool {
 }
 
 func (me *PostgreSQL) UpdateBannerContent(banner model.BannerContent) error {
-	tx := me.beginTransactionSafely()
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
 	var banner_old model.BannerContent
 	err := tx.First(&banner_old).Error
@@ -168,7 +189,12 @@ func (me *PostgreSQL) UpdateBannerContent(banner model.BannerContent) error {
 }
 
 func (me *PostgreSQL) UpdateBannerFeature(feature model.Feature) error {
-	tx := me.beginTransactionSafely()
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
 	var feature_old model.Feature
 	err := tx.First(&feature_old).Error
@@ -190,7 +216,12 @@ func (me *PostgreSQL) UpdateBannerFeature(feature model.Feature) error {
 }
 
 func (me *PostgreSQL) UpdateBannerTag(tag model.Tag) error {
-	tx := me.beginTransactionSafely()
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
 	var tag_old model.Feature
 	err := tx.First(&tag_old).Error
@@ -212,39 +243,178 @@ func (me *PostgreSQL) UpdateBannerTag(tag model.Tag) error {
 }
 
 func (me *PostgreSQL) GetBannerContent(id int32) (model.BannerContent, error) {
-	return bannerContent, nil
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	var banner model.BannerContent
+	err := tx.First(&banner, "id = ?", id).Error
+	if err != nil {
+		return model.BannerContent{}, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return model.BannerContent{}, err
+	}
+	return banner, nil
 }
 
 func (me *PostgreSQL) GetBannerFeatere(id int32) (model.Feature, error) {
-	return bannerFeature, nil
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	var feature model.Feature
+	err := tx.First(&feature, "content_id = ?", id).Error
+	if err != nil {
+		return model.Feature{}, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return model.Feature{}, err
+	}
+	return feature, nil
 }
 
 func (me *PostgreSQL) GetBannerTags(id int32) ([]model.Tag, error) {
-	return []model.Tag{bannerTag1, bannerTag2}, nil
-}
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
 
-func (me *PostgreSQL) DeleteBannerContent(int32) error {
-	return nil
-}
-
-func (me *PostgreSQL) DeleteBannerFeature(int32) error {
-	return nil
-}
-
-func (me *PostgreSQL) DeleteBannerTags(int32) error {
-	return nil
-}
-
-func (me *PostgreSQL) GetAllBannersByFilters(feature, tag, limit, offset int32, deactivated bool) ([]model.BannerContent, error) {
-	if deactivated {
-		return []model.BannerContent{bannerContent}, nil
+	var tags []model.Tag
+	err := tx.Find(&tags, "content_id = ?", id).Error
+	if err != nil {
+		return nil, err
 	}
-	return []model.BannerContent{}, nil
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+	return tags, nil
 }
 
-func (me *PostgreSQL) GetSpecificBanner(feature, tag int32, deactivated bool) (*model.BannerContent, error) {
-	if deactivated {
-		return &bannerContent, nil
+func (me *PostgreSQL) DeleteBannerContent(id int32) error {
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	err := tx.Delete(&model.BannerContent{}, id).Error
+	if err != nil {
+		return err
 	}
-	return nil, nil
+
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (me *PostgreSQL) DeleteBannerFeature(id int32) error {
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	err := tx.Where("content_id = ?", id).Delete(&model.Feature{}).Error
+	if err != nil {
+		return err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (me *PostgreSQL) DeleteBannerTags(id int32) error {
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	err := tx.Where("content_id = ?", id).Delete(&model.Tag{}).Error
+	if err != nil {
+		return err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (me *PostgreSQL) GetAllBannersByFilters(feature, tag, limit, offset int32, includeDeactivated bool) ([]model.BannerContent, error) {
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if offset > 0 {
+		tx = tx.Offset(int(offset))
+	}
+	if limit > 0 {
+		tx = tx.Limit(int(limit))
+	}
+	if !includeDeactivated {
+		tx = tx.Where("is_active = true")
+	}
+
+	var contents []model.BannerContent
+	err := tx.Joins("JOIN tags ON tags.content_id = banner_contents.id").
+		Joins("JOIN features ON features.content_id = banner_contents.id").
+		Where("tags.tag_id = ?", tag).Where("features.feature_id = ?", feature).
+		Find(&contents).Error
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+	return contents, nil
+}
+
+func (me *PostgreSQL) GetSpecificBanner(feature, tag int32, includeDeactivated bool) (*model.BannerContent, error) {
+	tx := me.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	if !includeDeactivated {
+		tx = tx.Where("is_active = true")
+	}
+
+	var banner []model.BannerContent
+	err := tx.Joins("JOIN tags ON tags.content_id = banner_contents.id").
+		Joins("JOIN features ON features.content_id = banner_contents.id").
+		Where("tags.tag_id = ?", tag).Where("features.feature_id = ?", feature).
+		Find(&banner).Error
+	if err != nil {
+		return nil, err
+	}
+	if len(banner) == 0 {
+		return nil, nil
+	}
+
+	return &banner[0], nil
 }

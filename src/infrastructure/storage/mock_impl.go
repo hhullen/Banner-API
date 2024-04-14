@@ -16,17 +16,17 @@ var bannerContent = model.BannerContent{
 }
 
 var bannerFeature = model.Feature{
-	ID:        1,
+	FeatureID: 1,
 	ContentID: 1,
 }
 
 var bannerTag1 = model.Tag{
-	ID:        1,
+	TagId:     1,
 	ContentID: 1,
 }
 
 var bannerTag2 = model.Tag{
-	ID:        2,
+	TagId:     2,
 	ContentID: 1,
 }
 
