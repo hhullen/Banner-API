@@ -1,0 +1,215 @@
+{
+	"info": {
+		"_postman_id": "5b4b06db-59cf-42c4-9bb8-db478f196d89",
+		"name": "Banner-API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28590242"
+	},
+	"item": [
+		{
+			"name": "/banner POST",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "user_token",
+						"value": "AVADAKEDABRA",
+						"type": "text"
+					},
+					{
+						"key": "user_token",
+						"value": "REDUKTO",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"tag_ids\": [\n    1, 2\n  ],\n  \"feature_id\": 9,\n  \"content\": {\n    \"title\": \"API Jutsu\",\n    \"text\": \"Hidden Leaf Village\",\n    \"url\": \"https://jut.su\"\n  },\n  \"is_active\": true\n}"
+				},
+				"url": {
+					"raw": "localhost:8080/banner",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"banner"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/banner/{id} PATCH",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "user_token",
+						"value": "AVADAKEDABRA",
+						"type": "text"
+					},
+					{
+						"key": "user_token",
+						"value": "REDUKTO",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"tag_ids\": [\n    1,2,3\n  ],\n  \"feature_id\": 2,\n  \"content\": {\n    \"title\": \"NEW API Jutsu\",\n    \"text\": \"NEW Hidden Leaf Village\",\n    \"url\": \"NEW https://jut.su/\"\n  },\n  \"is_active\": true\n}"
+				},
+				"url": {
+					"raw": "localhost:8080/banner/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"banner",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/banner/{id} DELETE",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "user_token",
+						"value": "AVADAKEDABRA",
+						"type": "text"
+					},
+					{
+						"key": "user_token",
+						"value": "REDUKTO",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:8080/banner/3",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"banner",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/banner GET",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "user_token",
+						"value": "AVADAKEDABRA",
+						"type": "text"
+					},
+					{
+						"key": "user_token",
+						"value": "REDUKTO",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:8080/banner?feature_id=2&tag_id=1&limit=5&offset=0",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"banner"
+					],
+					"query": [
+						{
+							"key": "feature_id",
+							"value": "2"
+						},
+						{
+							"key": "tag_id",
+							"value": "1"
+						},
+						{
+							"key": "limit",
+							"value": "5"
+						},
+						{
+							"key": "offset",
+							"value": "0"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/user_banner GET",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "user_token",
+						"value": "AVADAKEDABRA",
+						"type": "text"
+					},
+					{
+						"key": "user_token",
+						"value": "REDUKTO",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "localhost:8080/user_banner?feature_id=2&tag_id=3&use_last_revision=false",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"user_banner"
+					],
+					"query": [
+						{
+							"key": "feature_id",
+							"value": "2"
+						},
+						{
+							"key": "tag_id",
+							"value": "3"
+						},
+						{
+							"key": "use_last_revision",
+							"value": "false"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
